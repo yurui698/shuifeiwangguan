@@ -144,7 +144,6 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name></Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -171,9 +170,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>285</LineNumber>
+          <LineNumber>291</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134237602</Address>
+          <Address>134237696</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -182,7 +181,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>F:\01_姘磋偉\20171112鎺у埗鍣ㄦ帴鏀舵竻闆?- 姘磋偉\20171112鎺у埗鍣ㄦ帴鏀舵竻闆?- 姘磋偉\User\HandleTask.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\Induction_Heater\../User/HandleTask.c\285</Expression>
+          <Expression>\\Induction_Heater\../User/HandleTask.c\291</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -236,6 +235,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>SF_Flow_Data</ItemText>
         </Ww>
+        <Ww>
+          <count>10</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>test</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
@@ -252,6 +256,11 @@
           <count>2</count>
           <WinNumber>2</WinNumber>
           <ItemText>SF_PID_databuf</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>SF_Flow_Total</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>

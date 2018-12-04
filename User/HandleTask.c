@@ -266,9 +266,17 @@ static union   //触摸屏下发子站地址0x51
 } fertigation51;
 
 //定义两个控制器子站用于控制阀门
-volatile u8 PID_Para[56] = {0};
-u8 SF_PID_databuf[56] ={0}; //PID参数存储，全部为无符号数，有符号数待修改
-volatile u16 SF_Flow_Data[4] = {0};
+s16 PID_Para[28] = {0};    //PID参数flash读取，共28个浮点数，放大100倍，有符号，每个数两个字节,s16为有符号2字节整数，可以正负运算。
+/*PID_Para[28]定义
+[0]施灌总管压力设定 [1]配肥1浓度 [2]配肥2浓度 [3]配肥3浓度 [4]PIKd1 [5]PITi1 [6]PIK0X1 [7]PIK1X1 [8]PIK2X1
+[9]PIT0X1 [10]PIT1X1 [11]PIT2X1 [12]PIKd2 [13]PITi2 [14]PIK0X2 [15]PIK1X2 [16]PIK2X2 [17]PIT0X2 [18]PIT1X2 
+[19]PIT2X2 [20]PIKd3 [21]PITi3 [22]PIK0X3 [23]PIK1X3 [24]PIK2X3 [25]PIT0X3 [26]PIT1X3 
+[27]PIT2X3
+  PIKd1 = PIK0X1 + PIK1X1(流量) + PIK2X1(流量)2 
+*/
+u8 SF_PID_databuf[56] ={0}; //PID参数存储
+u16 SF_Flow_Data[4] = {0};  //三路流量下发，数据为放大10倍的整型数，网关已经12s采样滤波
+u16 SF_Flow_Total = 0;      //总管流量下发，数据为放大100倍的整型数
 u8 SF_flg=0;   //水肥机标志，=1为水肥机配肥控制器，控制配肥流量
 
 void Period_Events_Handle(u32 Events)
@@ -283,6 +291,7 @@ void Period_Events_Handle(u32 Events)
         YX_LED_ON;//需要看原理图？
 
         slave_init_readflash();
+			  
         startadc();
         if(RCC_GetFlagStatus(RCC_FLAG_PORRST)!=RESET)
         {
@@ -525,19 +534,20 @@ static void RxReport2(u8 len,u8 *pBuf)
                 {
 									SF_flg=1;
                     memcpy(fertigation51.set_int[pBuf[3]-40],pBuf+7,pBuf[6]); //设定PID控制参数
-									SF_PID_databuf[(pBuf[3]-40)*2] = ((u16)(fertigation51.set_float[pBuf[3]-40] * 100)) >> 8;//水肥浮点数k=100，b=0
-									SF_PID_databuf[(pBuf[3]-40)*2+1] = ((u16)(fertigation51.set_float[pBuf[3]-40] * 100)) & 0x00FF;
+										SF_PID_databuf[(pBuf[3]-40)*2+1] = ((s16)(fertigation51.set_float[pBuf[3]-40] * 100)) >> 8;//水肥浮点数k=100，b=0
+										SF_PID_databuf[(pBuf[3]-40)*2] = ((s16)(fertigation51.set_float[pBuf[3]-40] * 100)) & 0x00FF;
                     Flash_Write(0x0801C100, (uint8_t *)SF_PID_databuf,56) ; //RBT6的FLASH为128k，ram为20k，此处将参数保存在flash最后的16k;采集方式，参数个数，滤波次数
                     slave_init_readflash();
                     return;
                 }
-								if(pBuf[3] == 0x64)//网关采样配肥流量下发,三路流量，往站地址为SF_SlaveID_0与SF_SlaveID_1的两个控制器发送
+								if(pBuf[3] == 0x64 && pBuf[5] == 4)//网关采样配肥流量下发,三路流量和总管流量，往站地址为SF_SlaveID_0与SF_SlaveID_1的两个控制器发送
                 {
 									SF_flg =1;
                     //memcpy(SF_Flow_Data,pBuf+7,pBuf[6]); //设定PID控制参数
-										SF_Flow_Data[0] = (*(pBuf+7))|((*(pBuf+8))<<16);
-										SF_Flow_Data[1] = (*(pBuf+9))|((*(pBuf+10))<<16);
-										SF_Flow_Data[2] = (*(pBuf+11))|((*(pBuf+12))<<16);
+										SF_Flow_Data[0] = (*(pBuf+7))|((*(pBuf+8))<<8); //第一路流量 单位L/H 放大了10倍
+										SF_Flow_Data[1] = (*(pBuf+9))|((*(pBuf+10))<<8); //第二路流量 单位L/H 放大了10倍
+										SF_Flow_Data[2] = (*(pBuf+11))|((*(pBuf+12))<<8); //第三路流量 单位L/H 放大了10倍
+										SF_Flow_Total = (*(pBuf+13))|((*(pBuf+14))<<8); //总管流量 单位T/H 放大了100倍
                     return;
                 }
             }
@@ -1064,7 +1074,7 @@ static void slave_init_readflash(void)//子站初始化读flash
     {
         SI4463_Channel=slaveID_radioID[1];
     }
-    Flash_Read(0x0801C100,PID_Para, 56);//读取PID参数
+    Flash_Read(0x0801C100,(u8*)PID_Para, 56);//读取PID参数
 }
 
 

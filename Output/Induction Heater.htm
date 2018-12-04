@@ -3,7 +3,7 @@
 <title>Static Call Graph - [..\Output\Induction Heater.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image ..\Output\Induction Heater.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050169: Last Updated: Tue Nov 27 16:12:47 2018
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050169: Last Updated: Tue Dec 04 17:18:20 2018
 <BR><P>
 <H3>Maximum Stack Usage =        292 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1254,7 +1254,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sensor_data
 </UL>
 
-<P><STRONG><a name="[9d]"></a>Period_Events_Handle</STRONG> (Thumb, 838 bytes, Stack size 24 bytes, handletask.o(.text))
+<P><STRONG><a name="[9d]"></a>Period_Events_Handle</STRONG> (Thumb, 862 bytes, Stack size 24 bytes, handletask.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 268<LI>Call Chain = Period_Events_Handle &rArr; sensor_data &rArr; Get_Adclvbo
 </UL>
 <BR>[Calls]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART3_Configuration
@@ -1584,11 +1584,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RxReport2
 </UL>
 
-<P><STRONG><a name="[b8]"></a>__aeabi_f2uiz</STRONG> (Thumb, 40 bytes, Stack size 0 bytes, ffixui.o(.text))
+<P><STRONG><a name="[b8]"></a>__aeabi_f2iz</STRONG> (Thumb, 50 bytes, Stack size 0 bytes, ffixi.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RxReport2
 </UL>
 
-<P><STRONG><a name="[15e]"></a>__I$use$fp</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, iusefp.o(.text), UNUSED)
+<P><STRONG><a name="[15e]"></a>__I$use$fp</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, iusefp.o(.text), UNUSED)
 
 <P><STRONG><a name="[39]"></a>__scatterload</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, init.o(.text))
 <BR><BR>[Calls]<UL><LI><a href="#[e3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main_after_scatterload
@@ -1763,13 +1763,13 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Period_Events_Handle
 </UL>
 
-<P><STRONG><a name="[b6]"></a>RxReport2</STRONG> (Thumb, 990 bytes, Stack size 24 bytes, handletask.o(.text))
+<P><STRONG><a name="[b6]"></a>RxReport2</STRONG> (Thumb, 1024 bytes, Stack size 24 bytes, handletask.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 236<LI>Call Chain = RxReport2 &rArr; Flash_Write &rArr; Flash_Write_Without_check &rArr; FLASH_ProgramHalfWord &rArr; FLASH_WaitForLastOperation
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Start_timerEx
 <LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 <LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
-<LI><a href="#[b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2uiz
+<LI><a href="#[b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2iz
 <LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SI4463_Init
 <LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Flash_Write
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WriteDataToBuffer
@@ -1779,7 +1779,7 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Period_Events_Handle
 </UL>
 
-<P><STRONG><a name="[b9]"></a>sensor_data</STRONG> (Thumb, 1904 bytes, Stack size 20 bytes, handletask.o(.text))
+<P><STRONG><a name="[b9]"></a>sensor_data</STRONG> (Thumb, 1908 bytes, Stack size 20 bytes, handletask.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 244<LI>Call Chain = sensor_data &rArr; Get_Adclvbo
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_Adclvbo
@@ -1789,7 +1789,7 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Period_Events_Handle
 </UL>
 
-<P><STRONG><a name="[bd]"></a>IO_ctrl_cmd</STRONG> (Thumb, 3442 bytes, Stack size 8 bytes, handletask.o(.text))
+<P><STRONG><a name="[bd]"></a>IO_ctrl_cmd</STRONG> (Thumb, 3466 bytes, Stack size 8 bytes, handletask.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = IO_ctrl_cmd
 </UL>
 <BR>[Calls]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIO_ResetBits
