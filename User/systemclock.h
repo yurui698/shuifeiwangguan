@@ -21,13 +21,18 @@
 #define TX3_SEND_EVT        0x00004000
 #define RX3_DELAY_EVT       0x00008000
 #define RX3_TIMEOUT_EVT     0x00010000
+#define PID_CTRL_CMD_EVT    0x00020000
+#define MOTOR_ON_EVT      	0x00040000
+#define MOTOR_STOP_EVT     	0x00080000
+#define MOTOR_CTR_EVT    		0x00100000
+
 typedef struct timer_recall
-{	
-	u32 eventflag;   // 设定时间标志
+{
+    u32 eventflag;   // 设定时间标志
     u16 timeout;     // 设定触发时间
-	u16 reload_timeout;
-	struct timer_recall *next;
-}TimerRec;
+    u16 reload_timeout;
+    struct timer_recall *next;
+} TimerRec;
 
 
 
@@ -47,7 +52,7 @@ u8   Timer_Num_Active(void);
 void Set_Event(u32 eventflag);
 void Clear_Event(u32 eventflag);
 void Delayus(u32 dwTime);
-  
+
 #ifdef __cplusplus
 }
 #endif

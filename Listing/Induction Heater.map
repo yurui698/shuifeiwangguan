@@ -1,4 +1,4 @@
-Component: ARM Compiler 5.05 (build 41) Tool: armlink [4d0eb9]
+Component: ARM Compiler 5.05 update 2 (build 169) Tool: armlink [4d0f33]
 
 ==============================================================================
 
@@ -59,6 +59,8 @@ Section Cross References
     handletask.o(.text) refers to stm32f10x_it.o(.bss) for USART2SendTCB
     handletask.o(.text) refers to stm32f10x_it.o(.data) for USART2BufferCNT
     handletask.o(.text) refers to systemclock.o(.text) for Start_timerEx
+    handletask.o(.text) refers to fmul.o(.text) for __aeabi_fmul
+    handletask.o(.text) refers to ffixui.o(.text) for __aeabi_f2uiz
     handletask.o(.text) refers to stm32_configuration.o(.data) for ADC_ConvertedValue
     handletask.o(.text) refers to stm32f10x_dma.o(.text) for DMA_Cmd
     handletask.o(.text) refers to stm32f10x_adc.o(.text) for ADC_SoftwareStartConvCmd
@@ -113,6 +115,8 @@ Section Cross References
     mallocra.o(i.__realloc$memalign) refers to mvars.o(.data) for __microlib_freelist
     mallocra.o(i.internal_alloc) refers to memcpya.o(.text) for __aeabi_memcpy
     mallocra.o(i.internal_alloc) refers to mvars.o(.data) for __microlib_freelist
+    fmul.o(.text) refers (Special) to iusefp.o(.text) for __I$use$fp
+    ffixui.o(.text) refers (Special) to iusefp.o(.text) for __I$use$fp
     entry2.o(.ARM.Collect$$$$00000001) refers to entry2.o(.ARM.Collect$$$$00002712) for __lit__00000000
     entry2.o(.ARM.Collect$$$$00002712) refers to startup_stm32f10x_md.o(STACK) for __initial_sp
     entry2.o(__vectab_stack_and_reset_area) refers to startup_stm32f10x_md.o(STACK) for __initial_sp
@@ -146,19 +150,19 @@ Image Symbol Table
     Symbol Name                              Value     Ov Type        Size  Object(Section)
 
     ../clib/../cmprslib/zerorunl2.c          0x00000000   Number         0  __dczerorl2.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7b.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10a.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10a.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8a.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7b.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry2.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry5.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8b.o ABSOLUTE
     ../clib/microlib/malloc/malloc.c         0x00000000   Number         0  malloc.o ABSOLUTE
     ../clib/microlib/malloc/malloc.c         0x00000000   Number         0  mallocr.o ABSOLUTE
     ../clib/microlib/malloc/malloc.c         0x00000000   Number         0  malloca.o ABSOLUTE
@@ -167,6 +171,9 @@ Image Symbol Table
     ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpya.o ABSOLUTE
     ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpyb.o ABSOLUTE
     ../clib/microlib/string/memset.c         0x00000000   Number         0  memseta.o ABSOLUTE
+    ../clib/microlib/stubs.s                 0x00000000   Number         0  iusefp.o ABSOLUTE
+    ../fplib/microlib/fpfix.c                0x00000000   Number         0  ffixui.o ABSOLUTE
+    ../fplib/microlib/fpmul.c                0x00000000   Number         0  fmul.o ABSOLUTE
     ..\CMSIS\CM3\CoreSupport\core_cm3.c      0x00000000   Number         0  core_cm3.o ABSOLUTE
     ..\CMSIS\CM3\DeviceSupport\ST\STM32F10x\system_stm32f10x.c 0x00000000   Number         0  system_stm32f10x.o ABSOLUTE
     ..\Libraries\src\misc.c                  0x00000000   Number         0  misc.o ABSOLUTE
@@ -232,32 +239,35 @@ Image Symbol Table
     DeleteTimer                              0x08002c0f   Thumb Code     8  systemclock.o(.text)
     __set_PRIMASK                            0x08002ce3   Thumb Code     6  systemclock.o(.text)
     .text                                    0x08002d04   Section        0  handletask.o(.text)
-    slave_init_readflash                     0x08002d05   Thumb Code   270  handletask.o(.text)
-    GetCRC16                                 0x08002e13   Thumb Code    50  handletask.o(.text)
-    RxReport3                                0x08002e45   Thumb Code    84  handletask.o(.text)
-    WriteDataToBuffer                        0x08002e99   Thumb Code   128  handletask.o(.text)
-    ReadData                                 0x08002f19   Thumb Code    58  handletask.o(.text)
-    usart3_send_cmd                          0x08002f53   Thumb Code   144  handletask.o(.text)
-    SI4463RxReport                           0x08002fe3   Thumb Code   932  handletask.o(.text)
-    Clear_Buf                                0x08003387   Thumb Code    22  handletask.o(.text)
-    RxReport2                                0x0800339d   Thumb Code   806  handletask.o(.text)
-    sensor_data                              0x080037cf   Thumb Code  1912  handletask.o(.text)
-    IO_ctrl_cmd                              0x08003f47   Thumb Code  3448  handletask.o(.text)
-    startadc                                 0x08004cbf   Thumb Code    20  handletask.o(.text)
-    __set_FAULTMASK                          0x08005031   Thumb Code    10  handletask.o(.text)
-    NVIC_SystemReset                         0x0800503b   Thumb Code    26  handletask.o(.text)
-    .text                                    0x08005064   Section        0  dataflash.o(.text)
-    .text                                    0x08005148   Section        0  si4463.o(.text)
-    .text                                    0x080055b4   Section        0  memcpya.o(.text)
-    .text                                    0x080055d8   Section        0  memseta.o(.text)
-    .text                                    0x080055fc   Section       36  init.o(.text)
-    .text                                    0x08005620   Section        0  __dczerorl2.o(.text)
-    i.__scatterload_copy                     0x08005676   Section       14  handlers.o(i.__scatterload_copy)
-    i.__scatterload_null                     0x08005684   Section        2  handlers.o(i.__scatterload_null)
-    i.__scatterload_zeroinit                 0x08005686   Section       14  handlers.o(i.__scatterload_zeroinit)
-    i.free                                   0x08005694   Section        0  malloc.o(i.free)
-    i.malloc                                 0x080056e4   Section        0  malloc.o(i.malloc)
-    .constdata                               0x08005750   Section      514  handletask.o(.constdata)
+    slave_init_readflash                     0x08002d05   Thumb Code   272  handletask.o(.text)
+    GetCRC16                                 0x08002e15   Thumb Code    50  handletask.o(.text)
+    RxReport3                                0x08002e47   Thumb Code    84  handletask.o(.text)
+    WriteDataToBuffer                        0x08002e9b   Thumb Code   128  handletask.o(.text)
+    ReadData                                 0x08002f1b   Thumb Code    58  handletask.o(.text)
+    usart3_send_cmd                          0x08002f55   Thumb Code   144  handletask.o(.text)
+    SI4463RxReport                           0x08002fe5   Thumb Code   940  handletask.o(.text)
+    Clear_Buf                                0x08003391   Thumb Code    22  handletask.o(.text)
+    RxReport2                                0x080033a7   Thumb Code   990  handletask.o(.text)
+    sensor_data                              0x08003891   Thumb Code  1904  handletask.o(.text)
+    IO_ctrl_cmd                              0x08004001   Thumb Code  3442  handletask.o(.text)
+    startadc                                 0x08004d73   Thumb Code    20  handletask.o(.text)
+    __set_FAULTMASK                          0x080050d5   Thumb Code    10  handletask.o(.text)
+    NVIC_SystemReset                         0x080050df   Thumb Code    26  handletask.o(.text)
+    .text                                    0x0800512c   Section        0  dataflash.o(.text)
+    .text                                    0x08005210   Section        0  si4463.o(.text)
+    .text                                    0x0800567c   Section        0  memcpya.o(.text)
+    .text                                    0x080056a0   Section        0  memseta.o(.text)
+    .text                                    0x080056c4   Section        0  fmul.o(.text)
+    .text                                    0x08005728   Section        0  ffixui.o(.text)
+    .text                                    0x08005750   Section       36  init.o(.text)
+    .text                                    0x08005750   Section        0  iusefp.o(.text)
+    .text                                    0x08005774   Section        0  __dczerorl2.o(.text)
+    i.__scatterload_copy                     0x080057ca   Section       14  handlers.o(i.__scatterload_copy)
+    i.__scatterload_null                     0x080057d8   Section        2  handlers.o(i.__scatterload_null)
+    i.__scatterload_zeroinit                 0x080057da   Section       14  handlers.o(i.__scatterload_zeroinit)
+    i.free                                   0x080057e8   Section        0  malloc.o(i.free)
+    i.malloc                                 0x08005838   Section        0  malloc.o(i.malloc)
+    .constdata                               0x080058a4   Section      514  handletask.o(.constdata)
     .data                                    0x20000000   Section       20  stm32f10x_rcc.o(.data)
     APBAHBPrescTable                         0x20000000   Data          16  stm32f10x_rcc.o(.data)
     ADCPrescTable                            0x20000010   Data           4  stm32f10x_rcc.o(.data)
@@ -273,7 +283,7 @@ Image Symbol Table
     sysclockday                              0x20000050   Data           4  systemclock.o(.data)
     sysclockcnt                              0x20000054   Data           4  systemclock.o(.data)
     sysclockcnt_old                          0x20000058   Data           4  systemclock.o(.data)
-    .data                                    0x2000005c   Section      207  handletask.o(.data)
+    .data                                    0x2000005c   Section      220  handletask.o(.data)
     softspi                                  0x2000005c   Data           1  handletask.o(.data)
     RxReport2_len                            0x2000005d   Data           1  handletask.o(.data)
     RxReport3_len                            0x2000005e   Data           1  handletask.o(.data)
@@ -319,24 +329,25 @@ Image Symbol Table
     evt_sensor_data                          0x20000128   Data           1  handletask.o(.data)
     evt_check_eachevt                        0x20000129   Data           1  handletask.o(.data)
     evt_wx_cmd                               0x2000012a   Data           1  handletask.o(.data)
-    .data                                    0x2000012c   Section      372  si4463.o(.data)
-    softspi                                  0x2000012c   Data           1  si4463.o(.data)
-    max_delay                                0x2000029c   Data           4  si4463.o(.data)
-    .data                                    0x200002a0   Section        4  mvars.o(.data)
-    .data                                    0x200002a4   Section        4  mvars.o(.data)
-    .bss                                     0x200002a8   Section      905  stm32f10x_it.o(.bss)
-    .bss                                     0x20000634   Section     1504  handletask.o(.bss)
-    ReportData2                              0x20000634   Data         128  handletask.o(.bss)
-    ReceiveData2                             0x200006b4   Data         128  handletask.o(.bss)
-    ReportData3                              0x20000734   Data         128  handletask.o(.bss)
-    ReceiveData3                             0x200007b4   Data         128  handletask.o(.bss)
-    SI4463_TxBUFF                            0x20000834   Data         128  handletask.o(.bss)
-    start_run_nowtime                        0x200008b4   Data          16  handletask.o(.bss)
-    Adc_average                              0x200008c4   Data         800  handletask.o(.bss)
-    data_RS485                               0x20000be4   Data          48  handletask.o(.bss)
-    .bss                                     0x20000c14   Section        9  si4463.o(.bss)
-    HEAP                                     0x20000c20   Section      512  startup_stm32f10x_md.o(HEAP)
-    STACK                                    0x20000e20   Section     1024  startup_stm32f10x_md.o(STACK)
+    .data                                    0x20000138   Section      372  si4463.o(.data)
+    softspi                                  0x20000138   Data           1  si4463.o(.data)
+    max_delay                                0x200002a8   Data           4  si4463.o(.data)
+    .data                                    0x200002ac   Section        4  mvars.o(.data)
+    .data                                    0x200002b0   Section        4  mvars.o(.data)
+    .bss                                     0x200002b4   Section      905  stm32f10x_it.o(.bss)
+    .bss                                     0x20000640   Section     1728  handletask.o(.bss)
+    ReportData2                              0x20000640   Data         128  handletask.o(.bss)
+    ReceiveData2                             0x200006c0   Data         128  handletask.o(.bss)
+    ReportData3                              0x20000740   Data         128  handletask.o(.bss)
+    ReceiveData3                             0x200007c0   Data         128  handletask.o(.bss)
+    SI4463_TxBUFF                            0x20000840   Data         128  handletask.o(.bss)
+    start_run_nowtime                        0x200008c0   Data          16  handletask.o(.bss)
+    Adc_average                              0x200008d0   Data         800  handletask.o(.bss)
+    data_RS485                               0x20000bf0   Data          48  handletask.o(.bss)
+    fertigation51                            0x20000c20   Data         112  handletask.o(.bss)
+    .bss                                     0x20000d00   Section        9  si4463.o(.bss)
+    HEAP                                     0x20000d10   Section      512  startup_stm32f10x_md.o(HEAP)
+    STACK                                    0x20000f10   Section     1024  startup_stm32f10x_md.o(STACK)
     NO_INIT                                  0x20004c00   Section       40  handletask.o(NO_INIT)
     ControlValue                             0x20004c00   Data           8  handletask.o(NO_INIT)
     collector_data_buff                      0x20004c08   Data          16  handletask.o(NO_INIT)
@@ -346,7 +357,7 @@ Image Symbol Table
 
     Symbol Name                              Value     Ov Type        Size  Object(Section)
 
-    BuildAttributes$$THM_ISAv4$P$D$K$B$S$PE$A:L22UL41UL21$X:L11$S22US41US21$IEEE1$IW$USESV6$~STKCKD$USESV7$~SHL$OSPACE$EBA8$MICROLIB$REQ8$PRES8$EABIv2 0x00000000   Number         0  anon$$obj.o ABSOLUTE
+    BuildAttributes$$THM_ISAv4$P$D$K$B$S$PE$A:L22UL41UL21$X:L11$S22US41US21$IEEE1$IW$USESV6$~STKCKD$USESV7$~SHL$OSPACE$ROPI$EBA8$MICROLIB$REQ8$PRES8$EABIv2 0x00000000   Number         0  anon$$obj.o ABSOLUTE
     __ARM_use_no_argv                        0x00000000   Number         0  main.o ABSOLUTE
     __cpp_initialize__aeabi_                  - Undefined Weak Reference
     __cxa_finalize                            - Undefined Weak Reference
@@ -637,62 +648,65 @@ Image Symbol Table
     Get_timeoutEx                            0x08002c91   Thumb Code    34  systemclock.o(.text)
     Timer_Num_Active                         0x08002cb3   Thumb Code    36  systemclock.o(.text)
     Clear_Event                              0x08002cd7   Thumb Code    12  systemclock.o(.text)
-    TD_Getaverage                            0x080036c3   Thumb Code    68  handletask.o(.text)
-    First_Getaverage                         0x08003707   Thumb Code    40  handletask.o(.text)
-    Get_Adclvbo                              0x0800372f   Thumb Code   160  handletask.o(.text)
-    Period_Events_Handle                     0x08004cd3   Thumb Code   854  handletask.o(.text)
-    Scan_Events_Handle                       0x08005029   Thumb Code     8  handletask.o(.text)
-    Flash_Write_Without_check                0x08005065   Thumb Code    50  dataflash.o(.text)
-    Flash_Write                              0x08005097   Thumb Code   154  dataflash.o(.text)
-    Flash_Read                               0x08005131   Thumb Code    22  dataflash.o(.text)
-    SI4463_IOSET                             0x08005149   Thumb Code     2  si4463.o(.text)
-    Delayus                                  0x0800514b   Thumb Code    16  si4463.o(.text)
-    SPI_WriteByte                            0x0800515b   Thumb Code   142  si4463.o(.text)
-    SI4463_WAIT_CTS                          0x080051e9   Thumb Code    82  si4463.o(.text)
-    SI4463_READ_RESPONSE                     0x0800523b   Thumb Code    56  si4463.o(.text)
-    SI4463_CMD                               0x08005273   Thumb Code    48  si4463.o(.text)
-    SI4463_SPI_Active                        0x080052a3   Thumb Code    24  si4463.o(.text)
-    SI4463_Rx_State                          0x080052bb   Thumb Code    24  si4463.o(.text)
-    SI4463_INT_STATUS                        0x080052d3   Thumb Code    42  si4463.o(.text)
-    SI4463_GPIO_CONFIG                       0x080052fd   Thumb Code    74  si4463.o(.text)
-    SI4463_CONFIG_INIT                       0x08005347   Thumb Code    54  si4463.o(.text)
-    Delayms                                  0x0800537d   Thumb Code    20  si4463.o(.text)
-    SI4463_RESET                             0x08005391   Thumb Code    40  si4463.o(.text)
-    SI4463_Init                              0x080053b9   Thumb Code    18  si4463.o(.text)
-    SI4463_SET_PROPERTY_1                    0x080053cb   Thumb Code    44  si4463.o(.text)
-    SI4463_GET_PROPERTY_1                    0x080053f7   Thumb Code    44  si4463.o(.text)
-    SI4463_RX_FIFO_RESET                     0x08005423   Thumb Code    24  si4463.o(.text)
-    SI4463_TX_FIFO_RESET                     0x0800543b   Thumb Code    24  si4463.o(.text)
-    SI4463_PART_INFO                         0x08005453   Thumb Code    26  si4463.o(.text)
-    SI4463_GET_INFO                          0x0800546d   Thumb Code    26  si4463.o(.text)
-    SI4463_SEND_PACKET                       0x08005487   Thumb Code   118  si4463.o(.text)
-    SI4463_START_RX                          0x080054fd   Thumb Code   108  si4463.o(.text)
-    SI4463_READ_PACKET                       0x08005569   Thumb Code    70  si4463.o(.text)
-    __aeabi_memcpy                           0x080055b5   Thumb Code    36  memcpya.o(.text)
-    __aeabi_memcpy4                          0x080055b5   Thumb Code     0  memcpya.o(.text)
-    __aeabi_memcpy8                          0x080055b5   Thumb Code     0  memcpya.o(.text)
-    __aeabi_memset                           0x080055d9   Thumb Code    14  memseta.o(.text)
-    __aeabi_memset4                          0x080055d9   Thumb Code     0  memseta.o(.text)
-    __aeabi_memset8                          0x080055d9   Thumb Code     0  memseta.o(.text)
-    __aeabi_memclr                           0x080055e7   Thumb Code     4  memseta.o(.text)
-    __aeabi_memclr4                          0x080055e7   Thumb Code     0  memseta.o(.text)
-    __aeabi_memclr8                          0x080055e7   Thumb Code     0  memseta.o(.text)
-    _memset$wrapper                          0x080055eb   Thumb Code    18  memseta.o(.text)
-    __scatterload                            0x080055fd   Thumb Code    28  init.o(.text)
-    __scatterload_rt2                        0x080055fd   Thumb Code     0  init.o(.text)
-    __decompress                             0x08005621   Thumb Code     0  __dczerorl2.o(.text)
-    __decompress1                            0x08005621   Thumb Code    86  __dczerorl2.o(.text)
-    __scatterload_copy                       0x08005677   Thumb Code    14  handlers.o(i.__scatterload_copy)
-    __scatterload_null                       0x08005685   Thumb Code     2  handlers.o(i.__scatterload_null)
-    __scatterload_zeroinit                   0x08005687   Thumb Code    14  handlers.o(i.__scatterload_zeroinit)
-    free                                     0x08005695   Thumb Code    76  malloc.o(i.free)
-    malloc                                   0x080056e5   Thumb Code    92  malloc.o(i.malloc)
-    crc_lo                                   0x08005750   Data         256  handletask.o(.constdata)
-    crc_hi                                   0x08005850   Data         256  handletask.o(.constdata)
-    MaxTD_number                             0x08005950   Data           1  handletask.o(.constdata)
-    Maxlvbo_number                           0x08005951   Data           1  handletask.o(.constdata)
-    Region$$Table$$Base                      0x08005954   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x08005974   Number         0  anon$$obj.o(Region$$Table)
+    TD_Getaverage                            0x08003785   Thumb Code    68  handletask.o(.text)
+    First_Getaverage                         0x080037c9   Thumb Code    40  handletask.o(.text)
+    Get_Adclvbo                              0x080037f1   Thumb Code   160  handletask.o(.text)
+    Period_Events_Handle                     0x08004d87   Thumb Code   838  handletask.o(.text)
+    Scan_Events_Handle                       0x080050cd   Thumb Code     8  handletask.o(.text)
+    Flash_Write_Without_check                0x0800512d   Thumb Code    50  dataflash.o(.text)
+    Flash_Write                              0x0800515f   Thumb Code   154  dataflash.o(.text)
+    Flash_Read                               0x080051f9   Thumb Code    22  dataflash.o(.text)
+    SI4463_IOSET                             0x08005211   Thumb Code     2  si4463.o(.text)
+    Delayus                                  0x08005213   Thumb Code    16  si4463.o(.text)
+    SPI_WriteByte                            0x08005223   Thumb Code   142  si4463.o(.text)
+    SI4463_WAIT_CTS                          0x080052b1   Thumb Code    82  si4463.o(.text)
+    SI4463_READ_RESPONSE                     0x08005303   Thumb Code    56  si4463.o(.text)
+    SI4463_CMD                               0x0800533b   Thumb Code    48  si4463.o(.text)
+    SI4463_SPI_Active                        0x0800536b   Thumb Code    24  si4463.o(.text)
+    SI4463_Rx_State                          0x08005383   Thumb Code    24  si4463.o(.text)
+    SI4463_INT_STATUS                        0x0800539b   Thumb Code    42  si4463.o(.text)
+    SI4463_GPIO_CONFIG                       0x080053c5   Thumb Code    74  si4463.o(.text)
+    SI4463_CONFIG_INIT                       0x0800540f   Thumb Code    54  si4463.o(.text)
+    Delayms                                  0x08005445   Thumb Code    20  si4463.o(.text)
+    SI4463_RESET                             0x08005459   Thumb Code    40  si4463.o(.text)
+    SI4463_Init                              0x08005481   Thumb Code    18  si4463.o(.text)
+    SI4463_SET_PROPERTY_1                    0x08005493   Thumb Code    44  si4463.o(.text)
+    SI4463_GET_PROPERTY_1                    0x080054bf   Thumb Code    44  si4463.o(.text)
+    SI4463_RX_FIFO_RESET                     0x080054eb   Thumb Code    24  si4463.o(.text)
+    SI4463_TX_FIFO_RESET                     0x08005503   Thumb Code    24  si4463.o(.text)
+    SI4463_PART_INFO                         0x0800551b   Thumb Code    26  si4463.o(.text)
+    SI4463_GET_INFO                          0x08005535   Thumb Code    26  si4463.o(.text)
+    SI4463_SEND_PACKET                       0x0800554f   Thumb Code   118  si4463.o(.text)
+    SI4463_START_RX                          0x080055c5   Thumb Code   108  si4463.o(.text)
+    SI4463_READ_PACKET                       0x08005631   Thumb Code    70  si4463.o(.text)
+    __aeabi_memcpy                           0x0800567d   Thumb Code    36  memcpya.o(.text)
+    __aeabi_memcpy4                          0x0800567d   Thumb Code     0  memcpya.o(.text)
+    __aeabi_memcpy8                          0x0800567d   Thumb Code     0  memcpya.o(.text)
+    __aeabi_memset                           0x080056a1   Thumb Code    14  memseta.o(.text)
+    __aeabi_memset4                          0x080056a1   Thumb Code     0  memseta.o(.text)
+    __aeabi_memset8                          0x080056a1   Thumb Code     0  memseta.o(.text)
+    __aeabi_memclr                           0x080056af   Thumb Code     4  memseta.o(.text)
+    __aeabi_memclr4                          0x080056af   Thumb Code     0  memseta.o(.text)
+    __aeabi_memclr8                          0x080056af   Thumb Code     0  memseta.o(.text)
+    _memset$wrapper                          0x080056b3   Thumb Code    18  memseta.o(.text)
+    __aeabi_fmul                             0x080056c5   Thumb Code   100  fmul.o(.text)
+    __aeabi_f2uiz                            0x08005729   Thumb Code    40  ffixui.o(.text)
+    __I$use$fp                               0x08005751   Thumb Code     0  iusefp.o(.text)
+    __scatterload                            0x08005751   Thumb Code    28  init.o(.text)
+    __scatterload_rt2                        0x08005751   Thumb Code     0  init.o(.text)
+    __decompress                             0x08005775   Thumb Code     0  __dczerorl2.o(.text)
+    __decompress1                            0x08005775   Thumb Code    86  __dczerorl2.o(.text)
+    __scatterload_copy                       0x080057cb   Thumb Code    14  handlers.o(i.__scatterload_copy)
+    __scatterload_null                       0x080057d9   Thumb Code     2  handlers.o(i.__scatterload_null)
+    __scatterload_zeroinit                   0x080057db   Thumb Code    14  handlers.o(i.__scatterload_zeroinit)
+    free                                     0x080057e9   Thumb Code    76  malloc.o(i.free)
+    malloc                                   0x08005839   Thumb Code    92  malloc.o(i.malloc)
+    crc_lo                                   0x080058a4   Data         256  handletask.o(.constdata)
+    crc_hi                                   0x080059a4   Data         256  handletask.o(.constdata)
+    MaxTD_number                             0x08005aa4   Data           1  handletask.o(.constdata)
+    Maxlvbo_number                           0x08005aa5   Data           1  handletask.o(.constdata)
+    Region$$Table$$Base                      0x08005aa8   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x08005ac8   Number         0  anon$$obj.o(Region$$Table)
     SystemCoreClock                          0x20000014   Data           4  system_stm32f10x.o(.data)
     AHBPrescTable                            0x20000018   Data          16  system_stm32f10x.o(.data)
     RxFlag3                                  0x2000002a   Data           1  stm32f10x_it.o(.data)
@@ -716,21 +730,25 @@ Image Symbol Table
     ADC_ConvertedValue                       0x2000003e   Data           8  stm32_configuration.o(.data)
     timerhead                                0x20000048   Data           4  systemclock.o(.data)
     close_433MHZ                             0x20000114   Data           1  handletask.o(.data)
-    config_table                             0x2000012d   Data         364  si4463.o(.data)
-    __microlib_freelist                      0x200002a0   Data           4  mvars.o(.data)
-    __microlib_freelist_initialised          0x200002a4   Data           4  mvars.o(.data)
-    RecDataBuffer3                           0x200002a8   Data         128  stm32f10x_it.o(.bss)
-    RecDataBuffer2                           0x20000328   Data         128  stm32f10x_it.o(.bss)
-    RecDataBuffer1                           0x200003a8   Data         128  stm32f10x_it.o(.bss)
-    USART3SendTCB                            0x20000428   Data         128  stm32f10x_it.o(.bss)
-    USART2SendTCB                            0x200004a8   Data         128  stm32f10x_it.o(.bss)
-    USART1SendTCB                            0x20000528   Data         128  stm32f10x_it.o(.bss)
-    SI4463_RxBUFF                            0x200005a8   Data         128  stm32f10x_it.o(.bss)
-    Int_BUFF                                 0x20000628   Data           9  stm32f10x_it.o(.bss)
-    First                                    0x20000c14   Data           9  si4463.o(.bss)
-    __heap_base                              0x20000c20   Data           0  startup_stm32f10x_md.o(HEAP)
-    __heap_limit                             0x20000e20   Data           0  startup_stm32f10x_md.o(HEAP)
-    __initial_sp                             0x20001220   Data           0  startup_stm32f10x_md.o(STACK)
+    SF_Flow_Data                             0x2000012c   Data           8  handletask.o(.data)
+    a                                        0x20000134   Data           4  handletask.o(.data)
+    config_table                             0x20000139   Data         364  si4463.o(.data)
+    __microlib_freelist                      0x200002ac   Data           4  mvars.o(.data)
+    __microlib_freelist_initialised          0x200002b0   Data           4  mvars.o(.data)
+    RecDataBuffer3                           0x200002b4   Data         128  stm32f10x_it.o(.bss)
+    RecDataBuffer2                           0x20000334   Data         128  stm32f10x_it.o(.bss)
+    RecDataBuffer1                           0x200003b4   Data         128  stm32f10x_it.o(.bss)
+    USART3SendTCB                            0x20000434   Data         128  stm32f10x_it.o(.bss)
+    USART2SendTCB                            0x200004b4   Data         128  stm32f10x_it.o(.bss)
+    USART1SendTCB                            0x20000534   Data         128  stm32f10x_it.o(.bss)
+    SI4463_RxBUFF                            0x200005b4   Data         128  stm32f10x_it.o(.bss)
+    Int_BUFF                                 0x20000634   Data           9  stm32f10x_it.o(.bss)
+    PID_Para                                 0x20000c90   Data          56  handletask.o(.bss)
+    SF_PID_databuf                           0x20000cc8   Data          56  handletask.o(.bss)
+    First                                    0x20000d00   Data           9  si4463.o(.bss)
+    __heap_base                              0x20000d10   Data           0  startup_stm32f10x_md.o(HEAP)
+    __heap_limit                             0x20000f10   Data           0  startup_stm32f10x_md.o(HEAP)
+    __initial_sp                             0x20001310   Data           0  startup_stm32f10x_md.o(STACK)
 
 
 
@@ -740,22 +758,22 @@ Memory Map of the image
 
   Image Entry point : 0x080000ed
 
-  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00005c1c, Max: 0x00020000, ABSOLUTE, COMPRESSED[0x00005ae8])
+  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00005d7c, Max: 0x00020000, ABSOLUTE, COMPRESSED[0x00005c3c])
 
-    Execution Region ER_IROM1 (Base: 0x08000000, Size: 0x00005974, Max: 0x00020000, ABSOLUTE)
+    Execution Region ER_IROM1 (Base: 0x08000000, Size: 0x00005ac8, Max: 0x00020000, ABSOLUTE)
 
     Base Addr    Size         Type   Attr      Idx    E Section Name        Object
 
     0x08000000   0x000000ec   Data   RO            3    RESET               startup_stm32f10x_md.o
     0x080000ec   0x00000000   Code   RO          461  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
-    0x080000ec   0x00000004   Code   RO          498    .ARM.Collect$$$$00000001  mc_w.l(entry2.o)
-    0x080000f0   0x00000004   Code   RO          501    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
-    0x080000f4   0x00000000   Code   RO          503    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
-    0x080000f4   0x00000000   Code   RO          505    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
-    0x080000f4   0x00000008   Code   RO          506    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
-    0x080000fc   0x00000000   Code   RO          508    .ARM.Collect$$$$0000000D  mc_w.l(entry10a.o)
-    0x080000fc   0x00000000   Code   RO          510    .ARM.Collect$$$$0000000F  mc_w.l(entry11a.o)
-    0x080000fc   0x00000004   Code   RO          499    .ARM.Collect$$$$00002712  mc_w.l(entry2.o)
+    0x080000ec   0x00000004   Code   RO          502    .ARM.Collect$$$$00000001  mc_w.l(entry2.o)
+    0x080000f0   0x00000004   Code   RO          505    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
+    0x080000f4   0x00000000   Code   RO          507    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
+    0x080000f4   0x00000000   Code   RO          509    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
+    0x080000f4   0x00000008   Code   RO          510    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
+    0x080000fc   0x00000000   Code   RO          512    .ARM.Collect$$$$0000000D  mc_w.l(entry10a.o)
+    0x080000fc   0x00000000   Code   RO          514    .ARM.Collect$$$$0000000F  mc_w.l(entry11a.o)
+    0x080000fc   0x00000004   Code   RO          503    .ARM.Collect$$$$00002712  mc_w.l(entry2.o)
     0x08000100   0x00000024   Code   RO            4    .text               startup_stm32f10x_md.o
     0x08000124   0x000000dc   Code   RO           10    .text               misc.o
     0x08000200   0x0000044e   Code   RO          109    .text               stm32f10x_adc.o
@@ -774,25 +792,28 @@ Memory Map of the image
     0x08001ffc   0x00000330   Code   RO          339    .text               stm32f10x_it.o
     0x0800232c   0x00000710   Code   RO          361    .text               stm32_configuration.o
     0x08002a3c   0x000002c8   Code   RO          383    .text               systemclock.o
-    0x08002d04   0x00002360   Code   RO          406    .text               handletask.o
-    0x08005064   0x000000e2   Code   RO          432    .text               dataflash.o
-    0x08005146   0x00000002   PAD
-    0x08005148   0x0000046c   Code   RO          444    .text               si4463.o
-    0x080055b4   0x00000024   Code   RO          464    .text               mc_w.l(memcpya.o)
-    0x080055d8   0x00000024   Code   RO          466    .text               mc_w.l(memseta.o)
-    0x080055fc   0x00000024   Code   RO          514    .text               mc_w.l(init.o)
-    0x08005620   0x00000056   Code   RO          524    .text               mc_w.l(__dczerorl2.o)
-    0x08005676   0x0000000e   Code   RO          518    i.__scatterload_copy  mc_w.l(handlers.o)
-    0x08005684   0x00000002   Code   RO          519    i.__scatterload_null  mc_w.l(handlers.o)
-    0x08005686   0x0000000e   Code   RO          520    i.__scatterload_zeroinit  mc_w.l(handlers.o)
-    0x08005694   0x00000050   Code   RO          470    i.free              mc_w.l(malloc.o)
-    0x080056e4   0x0000006c   Code   RO          471    i.malloc            mc_w.l(malloc.o)
-    0x08005750   0x00000202   Data   RO          408    .constdata          handletask.o
-    0x08005952   0x00000002   PAD
-    0x08005954   0x00000020   Data   RO          516    Region$$Table       anon$$obj.o
+    0x08002d04   0x00002428   Code   RO          406    .text               handletask.o
+    0x0800512c   0x000000e2   Code   RO          432    .text               dataflash.o
+    0x0800520e   0x00000002   PAD
+    0x08005210   0x0000046c   Code   RO          444    .text               si4463.o
+    0x0800567c   0x00000024   Code   RO          464    .text               mc_w.l(memcpya.o)
+    0x080056a0   0x00000024   Code   RO          466    .text               mc_w.l(memseta.o)
+    0x080056c4   0x00000064   Code   RO          498    .text               mf_w.l(fmul.o)
+    0x08005728   0x00000028   Code   RO          500    .text               mf_w.l(ffixui.o)
+    0x08005750   0x00000000   Code   RO          518    .text               mc_w.l(iusefp.o)
+    0x08005750   0x00000024   Code   RO          519    .text               mc_w.l(init.o)
+    0x08005774   0x00000056   Code   RO          529    .text               mc_w.l(__dczerorl2.o)
+    0x080057ca   0x0000000e   Code   RO          523    i.__scatterload_copy  mc_w.l(handlers.o)
+    0x080057d8   0x00000002   Code   RO          524    i.__scatterload_null  mc_w.l(handlers.o)
+    0x080057da   0x0000000e   Code   RO          525    i.__scatterload_zeroinit  mc_w.l(handlers.o)
+    0x080057e8   0x00000050   Code   RO          470    i.free              mc_w.l(malloc.o)
+    0x08005838   0x0000006c   Code   RO          471    i.malloc            mc_w.l(malloc.o)
+    0x080058a4   0x00000202   Data   RO          408    .constdata          handletask.o
+    0x08005aa6   0x00000002   PAD
+    0x08005aa8   0x00000020   Data   RO          521    Region$$Table       anon$$obj.o
 
 
-    Execution Region RW_IRAM1 (Base: 0x20000000, Size: 0x00001220, Max: 0x00005000, ABSOLUTE, COMPRESSED[0x00000174])
+    Execution Region RW_IRAM1 (Base: 0x20000000, Size: 0x00001310, Max: 0x00005000, ABSOLUTE, COMPRESSED[0x00000174])
 
     Base Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -803,18 +824,17 @@ Memory Map of the image
     0x2000003c   0x0000000a   Data   RW          362    .data               stm32_configuration.o
     0x20000046   0x00000002   PAD
     0x20000048   0x00000014   Data   RW          385    .data               systemclock.o
-    0x2000005c   0x000000cf   Data   RW          409    .data               handletask.o
-    0x2000012b   0x00000001   PAD
-    0x2000012c   0x00000174   Data   RW          446    .data               si4463.o
-    0x200002a0   0x00000004   Data   RW          512    .data               mc_w.l(mvars.o)
-    0x200002a4   0x00000004   Data   RW          513    .data               mc_w.l(mvars.o)
-    0x200002a8   0x00000389   Zero   RW          340    .bss                stm32f10x_it.o
-    0x20000631   0x00000003   PAD
-    0x20000634   0x000005e0   Zero   RW          407    .bss                handletask.o
-    0x20000c14   0x00000009   Zero   RW          445    .bss                si4463.o
-    0x20000c1d   0x00000003   PAD
-    0x20000c20   0x00000200   Zero   RW            2    HEAP                startup_stm32f10x_md.o
-    0x20000e20   0x00000400   Zero   RW            1    STACK               startup_stm32f10x_md.o
+    0x2000005c   0x000000dc   Data   RW          409    .data               handletask.o
+    0x20000138   0x00000174   Data   RW          446    .data               si4463.o
+    0x200002ac   0x00000004   Data   RW          516    .data               mc_w.l(mvars.o)
+    0x200002b0   0x00000004   Data   RW          517    .data               mc_w.l(mvars.o)
+    0x200002b4   0x00000389   Zero   RW          340    .bss                stm32f10x_it.o
+    0x2000063d   0x00000003   PAD
+    0x20000640   0x000006c0   Zero   RW          407    .bss                handletask.o
+    0x20000d00   0x00000009   Zero   RW          445    .bss                si4463.o
+    0x20000d09   0x00000007   PAD
+    0x20000d10   0x00000200   Zero   RW            2    HEAP                startup_stm32f10x_md.o
+    0x20000f10   0x00000400   Zero   RW            1    STACK               startup_stm32f10x_md.o
 
 
     Execution Region MYRAM (Base: 0x20004c00, Size: 0x00000028, Max: 0x00000400, ABSOLUTE, UNINIT)
@@ -831,30 +851,30 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-       226          0          0          0          0       2071   dataflash.o
-      9056        772        514        207       1544      30463   handletask.o
-        28          6          0          1          0       9779   main.o
-       220         22          0          0          0     267793   misc.o
-      1132         40          0        372          9       6345   si4463.o
-        36          8        236          0       1536        860   startup_stm32f10x_md.o
-      1808         82          0         10          0       4171   stm32_configuration.o
-      1102         26          0          0          0      10861   stm32f10x_adc.o
-       596          8          0          0          0       4358   stm32f10x_dma.o
-       284         10          0          0          0       2263   stm32f10x_exti.o
-      1468         34          0          0          0       8062   stm32f10x_flash.o
-       860         38          0          0          0       5677   stm32f10x_gpio.o
-       816        104          0         19        905       4183   stm32f10x_it.o
-        64          6          0          0          0       1285   stm32f10x_iwdg.o
-       932         36          0         20          0       8868   stm32f10x_rcc.o
-       780         14          0          0          0       6554   stm32f10x_spi.o
-      1078         26          0          0          0       8508   stm32f10x_usart.o
-       480         38          0         20          0       2067   system_stm32f10x.o
-       712         28          0         20          0      19849   systemclock.o
+       226          0          0          0          0       2075   dataflash.o
+      9256        810        514        220       1768      30722   handletask.o
+        28          6          0          1          0       9915   main.o
+       220         22          0          0          0     267853   misc.o
+      1132         40          0        372          9       6369   si4463.o
+        36          8        236          0       1536        868   startup_stm32f10x_md.o
+      1808         82          0         10          0       4187   stm32_configuration.o
+      1102         26          0          0          0      10877   stm32f10x_adc.o
+       596          8          0          0          0       4374   stm32f10x_dma.o
+       284         10          0          0          0       2279   stm32f10x_exti.o
+      1468         34          0          0          0       8078   stm32f10x_flash.o
+       860         38          0          0          0       5689   stm32f10x_gpio.o
+       816        104          0         19        905       4203   stm32f10x_it.o
+        64          6          0          0          0       1293   stm32f10x_iwdg.o
+       932         36          0         20          0       8892   stm32f10x_rcc.o
+       780         14          0          0          0       6570   stm32f10x_spi.o
+      1078         26          0          0          0       8524   stm32f10x_usart.o
+       480         38          0         20          0       2091   system_stm32f10x.o
+       712         28          0         20          0      19857   systemclock.o
 
     ----------------------------------------------------------------------
-     21684       1298        784        672       4000     404017   Object Totals
+     21884       1336        784        684       4228     404716   Object Totals
          0          0         32          0          0          0   (incl. Generated)
-         6          0          2          3          6          0   (incl. Padding)
+         6          0          2          2         10          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
@@ -871,13 +891,16 @@ Image component sizes
          8          4          0          0          0          0   entry9a.o
         30          0          0          0          0          0   handlers.o
         36          8          0          0          0         68   init.o
+         0          0          0          0          0          0   iusefp.o
        188         20          0          0          0        160   malloc.o
         36          0          0          0          0         68   memcpya.o
         36          0          0          0          0        108   memseta.o
          0          0          0          8          0          0   mvars.o
+        40          0          0          0          0         68   ffixui.o
+       100          0          0          0          0         76   fmul.o
 
     ----------------------------------------------------------------------
-       432         36          0          8          0        404   Library Totals
+       572         36          0          8          0        548   Library Totals
          0          0          0          0          0          0   (incl. Padding)
 
     ----------------------------------------------------------------------
@@ -885,9 +908,10 @@ Image component sizes
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Library Name
 
        432         36          0          8          0        404   mc_w.l
+       140          0          0          0          0        144   mf_w.l
 
     ----------------------------------------------------------------------
-       432         36          0          8          0        404   Library Totals
+       572         36          0          8          0        548   Library Totals
 
     ----------------------------------------------------------------------
 
@@ -896,15 +920,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     22116       1334        784        680       4000     402469   Grand Totals
-     22116       1334        784        372       4000     402469   ELF Image Totals (compressed)
-     22116       1334        784        372          0          0   ROM Totals
+     22456       1372        784        692       4228     403260   Grand Totals
+     22456       1372        784        372       4228     403260   ELF Image Totals (compressed)
+     22456       1372        784        372          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                22900 (  22.36kB)
-    Total RW  Size (RW Data + ZI Data)              4680 (   4.57kB)
-    Total ROM Size (Code + RO Data + RW Data)      23272 (  22.73kB)
+    Total RO  Size (Code + RO Data)                23240 (  22.70kB)
+    Total RW  Size (RW Data + ZI Data)              4920 (   4.80kB)
+    Total ROM Size (Code + RO Data + RW Data)      23612 (  23.06kB)
 
 ==============================================================================
 

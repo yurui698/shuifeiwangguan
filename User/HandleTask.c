@@ -55,9 +55,12 @@ SWD½Ó¿Ú:SWCLK---PA14,SWDIO---PA13,NRST---NRST;TTL´®¿Ú1£ºTXD1---PA9£¬RXD1---PA10£
 #define true 1
 #define false 0
 #define bool u8
+#define SF_SlaveID_0 37
+#define SF_SlaveID_1 38
 
 /*CRCµÍÎ»×Ö½Ú±í*/
-const unsigned char crc_lo[256]= {
+const unsigned char crc_lo[256]=
+{
     0x00,0xC0,0xC1,0x01,0xC3,0x03,0x02,0xC2,0xC6,0x06,0x07,0xC7,0x05,0xC5,0xC4,
     0x04,0xCC,0x0C,0x0D,0xCD,0x0F,0xCF,0xCE,0x0E,0x0A,0xCA,0xCB,0x0B,0xC9,0x09,
     0x08,0xC8,0xD8,0x18,0x19,0xD9,0x1B,0xDB,0xDA,0x1A,0x1E,0xDE,0xDF,0x1F,0xDD,
@@ -80,7 +83,8 @@ const unsigned char crc_lo[256]= {
 
 
 /*CRC¸ßÎ»×Ö½Ú±í*/
-const unsigned char crc_hi[256]= {
+const unsigned char crc_hi[256]=
+{
     0x00,0xC1,0x81,0x40,0x01,0xC0,0x80,0x41,0x01,0xC0,0x80,0x41,0x00,0xC1,0x81,
     0x40,0x01,0xC0,0x80,0x41,0x00,0xC1,0x81,0x40,0x00,0xC1,0x81,0x40,0x01,0xC0,
     0x80,0x41,0x01,0xC0,0x80,0x41,0x00,0xC1,0x81,0x40,0x00,0xC1,0x81,0x40,0x01,
@@ -175,7 +179,7 @@ static u8  cjkzslave_param_set[36]= {0x00,0x00,0x01,0x00,0x00,0x00,
 */
 static u8  ReadDataCNT2        =  0;
 static u8  ReadDataCNT1       =  0;
-static u8  slave_ctrl_ID      =  0;
+static u8  slave_ctrl_ID      =  SF_SlaveID_0;
 static u8  SI4463_TxBUFF[128];
 static u16 regLen;
 static u8  SI4463_Channel     =  0;
@@ -255,6 +259,18 @@ static u8  evt_sensor_data;
 static u8  evt_check_eachevt;
 static u8  evt_wx_cmd=0;
 
+static union   //´¥ÃþÆÁÏÂ·¢×ÓÕ¾µØÖ·0x51
+{
+    float set_float[28];//Ë®·Ê»ú¹ÜµÀ²¼ÖÃ¼°PIDÉè¶¨
+    u8 set_int[28][4];
+} fertigation51;
+
+//¶¨ÒåÁ½¸ö¿ØÖÆÆ÷×ÓÕ¾ÓÃÓÚ¿ØÖÆ·§ÃÅ
+volatile u8 PID_Para[56] = {0};
+u8 SF_PID_databuf[56] ={0}; //PID²ÎÊý´æ´¢£¬È«²¿ÎªÎÞ·ûºÅÊý£¬ÓÐ·ûºÅÊý´ýÐÞ¸Ä
+volatile u16 SF_Flow_Data[4] = {0};
+u8 SF_flg=0;   //Ë®·Ê»ú±êÖ¾£¬=1ÎªË®·Ê»úÅä·Ê¿ØÖÆÆ÷£¬¿ØÖÆÅä·ÊÁ÷Á¿
+
 void Period_Events_Handle(u32 Events)
 {
     if(Events&SYS_INIT_EVT)
@@ -306,10 +322,12 @@ void Period_Events_Handle(u32 Events)
         evt_sensor_data=0;
         sensor_data();
         Start_timerEx( SENSOR_DATA_EVT, MEASURE_PERIOD );
-        if(evt_check_eachevt<=250) {
+        if(evt_check_eachevt<=250)
+        {
             evt_check_eachevt++;
         }
-        else {
+        else
+        {
             __set_FAULTMASK(1);
             NVIC_SystemReset();
             while(1);
@@ -368,15 +386,18 @@ void Period_Events_Handle(u32 Events)
     if(Events&CHECK_EACHEVT_EVT)
     {
         evt_check_eachevt=0;
-        if(evt_sensor_data<=50) {
+        if(evt_sensor_data<=50)
+        {
             evt_sensor_data++;
         }
-        else {
+        else
+        {
             __set_FAULTMASK(1);
             NVIC_SystemReset();
             while(1);
         }
-        if(evt_wx_cmd<=180) {
+        if(evt_wx_cmd<=180)
+        {
             evt_wx_cmd++;
         }
         else
@@ -498,6 +519,25 @@ static void RxReport2(u8 len,u8 *pBuf)
                     memcpy(cjkzslave_param_set,pBuf+7,pBuf[6]); //²É¼¯Æ÷»ò¿ØÖÆÆ÷µÄ²É¼¯²ÎÊýÉè¶¨£¬ÒÔ²É¼¯Æ÷»ò¿ØÖÆÆ÷Îª1×é£¬Ã¿×é18¸ö²ÎÊý£¨Ã¿¸ö²É¼¯Í¨µÀ3¸ö²ÎÊý:²É¼¯·½Ê½£¬²ÎÊý¸öÊý£¬ÂË²¨´ÎÊý£¬6Í¨µÀ²É¼¯Æ÷£©
                     Flash_Write(0x0801C000, cjkzslave_param_set,36) ; //RBT6µÄFLASHÎª128k£¬ramÎª20k£¬´Ë´¦½«²ÎÊý±£´æÔÚflash×îºóµÄ16k;²É¼¯·½Ê½£¬²ÎÊý¸öÊý£¬ÂË²¨´ÎÊý
                     slave_init_readflash();
+                    return;
+                }
+                if(pBuf[3]>=0x28&&pBuf[3]<0x44)//PIDÉè¶¨²ÎÊý±£´æ,ÓÉÍø¹ØÏÂ·¢£¬¼Ä´æÆ÷µØÖ·+40£¬´Ó40µ½68
+                {
+									SF_flg=1;
+                    memcpy(fertigation51.set_int[pBuf[3]-40],pBuf+7,pBuf[6]); //Éè¶¨PID¿ØÖÆ²ÎÊý
+									SF_PID_databuf[(pBuf[3]-40)*2] = ((u16)(fertigation51.set_float[pBuf[3]-40] * 100)) >> 8;//Ë®·Ê¸¡µãÊýk=100£¬b=0
+									SF_PID_databuf[(pBuf[3]-40)*2+1] = ((u16)(fertigation51.set_float[pBuf[3]-40] * 100)) & 0x00FF;
+                    Flash_Write(0x0801C100, (uint8_t *)SF_PID_databuf,56) ; //RBT6µÄFLASHÎª128k£¬ramÎª20k£¬´Ë´¦½«²ÎÊý±£´æÔÚflash×îºóµÄ16k;²É¼¯·½Ê½£¬²ÎÊý¸öÊý£¬ÂË²¨´ÎÊý
+                    slave_init_readflash();
+                    return;
+                }
+								if(pBuf[3] == 0x64)//Íø¹Ø²ÉÑùÅä·ÊÁ÷Á¿ÏÂ·¢,ÈýÂ·Á÷Á¿£¬ÍùÕ¾µØÖ·ÎªSF_SlaveID_0ÓëSF_SlaveID_1µÄÁ½¸ö¿ØÖÆÆ÷·¢ËÍ
+                {
+									SF_flg =1;
+                    //memcpy(SF_Flow_Data,pBuf+7,pBuf[6]); //Éè¶¨PID¿ØÖÆ²ÎÊý
+										SF_Flow_Data[0] = (*(pBuf+7))|((*(pBuf+8))<<16);
+										SF_Flow_Data[1] = (*(pBuf+9))|((*(pBuf+10))<<16);
+										SF_Flow_Data[2] = (*(pBuf+11))|((*(pBuf+12))<<16);
                     return;
                 }
             }
@@ -763,14 +803,17 @@ static void sensor_data(void)
                 tdcycle_i[TD_number]=0;
             }
             MotorCurrent0 = temp_adc;
-            if(MotorCurrent0<100) {
+            if(MotorCurrent0<100)
+            {
                 MotorCurrent0=0;   //testÊ±È¡Ïû
             }
-            if(MotorCurrent0> MotorMAX[0]) {
+            if(MotorCurrent0> MotorMAX[0])
+            {
                 MotorMAX[0]=MotorCurrent0;
             }
             MotorCurrent1=MotorCurrent0;
-            if(MotorCurrent1> MotorMAX[1]) {
+            if(MotorCurrent1> MotorMAX[1])
+            {
                 MotorMAX[1]=MotorCurrent1;
             }
             if(roller1_state==0)
@@ -890,14 +933,17 @@ static void sensor_data(void)
                 tdcycle_i[TD_number]=0;
             }
             MotorCurrent2 = temp_adc;//1436=1305*1.1;0.2V¶ÔÓ¦262(0x0106)£¬1.0V¶ÔÓ¦1305(0x0519)
-            if(MotorCurrent2<100) {
+            if(MotorCurrent2<100)
+            {
                 MotorCurrent2=0;   //testÊ±È¡Ïû
             }
-            if(MotorCurrent2> MotorMAX[2]) {
+            if(MotorCurrent2> MotorMAX[2])
+            {
                 MotorMAX[2]=MotorCurrent2;
             }
             MotorCurrent3=MotorCurrent2;
-            if(MotorCurrent3> MotorMAX[3]) {
+            if(MotorCurrent3> MotorMAX[3])
+            {
                 MotorMAX[3]=MotorCurrent3;
             }
             if(roller2_state==0)
@@ -974,10 +1020,12 @@ static void sensor_data(void)
         }
         break;
     }
-    if(ReadDataCNT1>=2) {
+    if(ReadDataCNT1>=2)
+    {
         ReadDataCNT1=0;
     }
-    else {
+    else
+    {
         ReadDataCNT1++;
     }
 }
@@ -1006,13 +1054,17 @@ static void slave_init_readflash(void)//×ÓÕ¾³õÊ¼»¯¶Áflash
         continue_run_nowtime[i/6]= continue_run_time[i/6]*10;
     }
     Flash_Read(0x0801C800,  slaveID_radioID, 2);//¶ÁÈ¡Õ¾µØÖ·¼°433MHZÐÅµÀ
-    slave_ctrl_ID=slaveID_radioID[0];
-    if(slaveID_radioID[1]==0xFF) {
+
+    //slave_ctrl_ID=slaveID_radioID[0];
+    if(slaveID_radioID[1]==0xFF)
+    {
         SI4463_Channel=0;
     }
-    else {
+    else
+    {
         SI4463_Channel=slaveID_radioID[1];
     }
+    Flash_Read(0x0801C100,PID_Para, 56);//¶ÁÈ¡PID²ÎÊý
 }
 
 
@@ -1027,16 +1079,20 @@ static void IO_ctrl_cmd(void)
             control_type[i]=0;//µ¥Ïò¿ØÖÆ
             if(single_delay_flg[i]==0)
             {
-                if(i==0) {
+                if(i==0)
+                {
                     CTRL_CLOSE0;
                 }
-                if(i==1) {
+                if(i==1)
+                {
                     CTRL_CLOSE1;
                 }
-                if(i==2) {
+                if(i==2)
+                {
                     CTRL_CLOSE2;
                 }
-                if(i==3) {
+                if(i==3)
+                {
                     CTRL_CLOSE3;
                 }
                 if(single_old_ControlValue[i]!=0)
@@ -1046,7 +1102,8 @@ static void IO_ctrl_cmd(void)
                 }
                 single_delay_flg[i]=1;
             }
-            else if(single_delay_time[i]>=1) {
+            else if(single_delay_time[i]>=1)
+            {
                 single_delay_time[i]--;   //³¤Ê±¼ä£¨3Ãë¼°ÒÔÉÏ£©µç»úÍ£Ö¹ÔËÐÐ£¬¿ÉÒÔÁ¢¼´Æô¶¯µç»ú
             }
             break;
@@ -1054,24 +1111,30 @@ static void IO_ctrl_cmd(void)
             control_type[i]=0;//µ¥Ïò¿ØÖÆ
             if(single_delay_time[i]==0)
             {
-                if(start_run_nowtime[i]>=1) {
+                if(start_run_nowtime[i]>=1)
+                {
                     start_run_nowtime[i]--;
                 }
                 if(start_run_nowtime[i]==0)//¿ª²ÉÓÃÑÓÊ±Æô¶¯²ÎÊýºÍÁ¬ÐøÔËÐÐÊ±¼ä²ÎÊý£»¹Ø²»ÑÓÊ±
                 {
-                    if(i==0) {
+                    if(i==0)
+                    {
                         CTRL_OPEN0;
                     }
-                    if(i==1) {
+                    if(i==1)
+                    {
                         CTRL_OPEN1;
                     }
-                    if(i==2) {
+                    if(i==2)
+                    {
                         CTRL_OPEN2;
                     }
-                    if(i==3) {
+                    if(i==3)
+                    {
                         CTRL_OPEN3;
                     }
-                    if(continue_run_nowtime[i]>=1&&continue_run_nowtime[i]<=0xFF00*10) {
+                    if(continue_run_nowtime[i]>=1&&continue_run_nowtime[i]<=0xFF00*10)
+                    {
                         continue_run_nowtime[i]--;
                     }
                     if(continue_run_nowtime[i]==0)
@@ -1081,14 +1144,16 @@ static void IO_ctrl_cmd(void)
                         start_run_nowtime[i]=start_run_time[i]*10;
                     }
                 }
-                if(single_old_ControlValue[i]!=1) {
+                if(single_old_ControlValue[i]!=1)
+                {
                     single_old_ControlValue[i]=1;
                     MotorMAX[i]=0;
                     First_adc_average[i]=0;
                 }
                 single_delay_flg[i]=0;
             }
-            if(single_delay_time[i]>=1) {
+            if(single_delay_time[i]>=1)
+            {
                 single_delay_time[i]--;
             }
             break;
@@ -1104,12 +1169,14 @@ static void IO_ctrl_cmd(void)
                         ROLLER1_DOWN;
                         batch_ctrl_finish[1]=1;
                         bidirection_location_flg[i]=0;
-                        if(roller1_state!=2) {
+                        if(roller1_state!=2)
+                        {
                             MotorMAX[1]=0;
                             First_adc_average[1]=0;
                         }
                         roller1_state=2;//0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
-                        if(continue_run_nowtime[i+1]>=1&&continue_run_nowtime[i+1]<=0xFF00*10) {
+                        if(continue_run_nowtime[i+1]>=1&&continue_run_nowtime[i+1]<=0xFF00*10)
+                        {
                             continue_run_nowtime[i+1]--;
                         }
                         if(continue_run_nowtime[i+1]==0)
@@ -1122,7 +1189,8 @@ static void IO_ctrl_cmd(void)
                             roller1_state=0;//0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
                         }
                     }
-                    else if(start_run_nowtime[i+1]>=1) {
+                    else if(start_run_nowtime[i+1]>=1)
+                    {
                         start_run_nowtime[i+1]--;
                     }
                 }
@@ -1146,12 +1214,14 @@ static void IO_ctrl_cmd(void)
                         ROLLER2_DOWN;
                         batch_ctrl_finish[3]=1;
                         bidirection_location_flg[i]=0;
-                        if(roller2_state!=2) {
+                        if(roller2_state!=2)
+                        {
                             MotorMAX[3]=0;
                             First_adc_average[3]=0;
                         }
                         roller2_state=2;//0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
-                        if(continue_run_nowtime[i+1]>=1&&continue_run_nowtime[i+1]<=0xFF00*10) {
+                        if(continue_run_nowtime[i+1]>=1&&continue_run_nowtime[i+1]<=0xFF00*10)
+                        {
                             continue_run_nowtime[i+1]--;
                         }
                         if(continue_run_nowtime[i+1]==0)
@@ -1164,7 +1234,8 @@ static void IO_ctrl_cmd(void)
                             roller2_state=0;//0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ,ÔÚµçÁ÷¼ì²âÖÐÅÐ¶ÏÉÏÐÐ»òÏÂÐÐµÄ¼ì²âµçÁ÷¼°±£»¤
                         }
                     }
-                    else if(start_run_nowtime[i+1]>=1) {
+                    else if(start_run_nowtime[i+1]>=1)
+                    {
                         start_run_nowtime[i+1]--;
                     }
                 }
@@ -1193,12 +1264,14 @@ static void IO_ctrl_cmd(void)
                         ROLLER1_UP;
                         batch_ctrl_finish[0]=1;
                         bidirection_location_flg[i]=0;
-                        if(roller1_state!=1) {
+                        if(roller1_state!=1)
+                        {
                             MotorMAX[0]=0;
                             First_adc_average[0]=0;
                         }
                         roller1_state=1;//0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
-                        if(continue_run_nowtime[i]>=1&&continue_run_nowtime[i]<=0xFF00*10) {
+                        if(continue_run_nowtime[i]>=1&&continue_run_nowtime[i]<=0xFF00*10)
+                        {
                             continue_run_nowtime[i]--;
                         }
                         if(continue_run_nowtime[i]==0)
@@ -1211,7 +1284,8 @@ static void IO_ctrl_cmd(void)
                             roller1_state=0;//0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
                         }
                     }
-                    else if(start_run_nowtime[i]>=1) {
+                    else if(start_run_nowtime[i]>=1)
+                    {
                         start_run_nowtime[i]--;
                     }
                 }
@@ -1235,12 +1309,14 @@ static void IO_ctrl_cmd(void)
                         ROLLER2_UP;
                         batch_ctrl_finish[2]=1;
                         bidirection_location_flg[i]=0;
-                        if(roller2_state!=1) {
+                        if(roller2_state!=1)
+                        {
                             MotorMAX[2]=0;
                             First_adc_average[2]=0;
                         }
                         roller2_state=1;//0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
-                        if(continue_run_nowtime[i]>=1&&continue_run_nowtime[i]<=0xFF00*10) {
+                        if(continue_run_nowtime[i]>=1&&continue_run_nowtime[i]<=0xFF00*10)
+                        {
                             continue_run_nowtime[i]--;
                         }
                         if(continue_run_nowtime[i]==0)
@@ -1253,7 +1329,8 @@ static void IO_ctrl_cmd(void)
                             roller2_state=0;//0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
                         }
                     }
-                    else if(start_run_nowtime[i]>=1) {
+                    else if(start_run_nowtime[i]>=1)
+                    {
                         start_run_nowtime[i]--;
                     }
                 }
@@ -1272,41 +1349,51 @@ static void IO_ctrl_cmd(void)
             break;
         case 0x0004://¿ª¹ØÐÍÅúÁ¿¿ØÖÆÃüÁî£º¹Ø
             control_type[i]=0;//µ¥Ïò¿ØÖÆ
-            if(i==0) {
+            if(i==0)
+            {
                 CTRL_CLOSE0;
             }
-            if(i==1) {
+            if(i==1)
+            {
                 CTRL_CLOSE1;
             }
-            if(i==2) {
+            if(i==2)
+            {
                 CTRL_CLOSE2;
             }
-            if(i==3) {
+            if(i==3)
+            {
                 CTRL_CLOSE3;
             }
             break;
         case 0x0005://¿ª¹ØÐÍÅúÁ¿¿ØÖÆÃüÁî£º¿ª
             control_type[i]=0;//µ¥Ïò¿ØÖÆ
-            if(start_run_nowtime[i]>=1) {
+            if(start_run_nowtime[i]>=1)
+            {
                 start_run_nowtime[i]--;
                 MotorMAX[i]=0;
                 First_adc_average[i]=0;
             }
             if(start_run_nowtime[i]==0)//¿ª²ÉÓÃÑÓÊ±Æô¶¯²ÎÊýºÍÁ¬ÐøÔËÐÐÊ±¼ä²ÎÊý£»¹Ø²»ÑÓÊ±
             {
-                if(i==0) {
+                if(i==0)
+                {
                     CTRL_OPEN0;
                 }
-                if(i==1) {
+                if(i==1)
+                {
                     CTRL_OPEN1;
                 }
-                if(i==2) {
+                if(i==2)
+                {
                     CTRL_OPEN2;
                 }
-                if(i==3) {
+                if(i==3)
+                {
                     CTRL_OPEN3;
                 }
-                if(continue_run_nowtime[i]>=1&&continue_run_nowtime[i]<=0xFF00*10) {
+                if(continue_run_nowtime[i]>=1&&continue_run_nowtime[i]<=0xFF00*10)
+                {
                     continue_run_nowtime[i]--;
                 }
                 if(continue_run_nowtime[i]==0)
@@ -1325,11 +1412,13 @@ static void IO_ctrl_cmd(void)
             control_type[i]=1;//Õý¡¢·´Ïò¿ØÖÆ
             if(bidirection_delay_flg[i]==0)
             {
-                if(i==0) {
+                if(i==0)
+                {
                     ROLLER1_STOP;    //0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
                     roller1_state=0;
                 }
-                if(i==2) {
+                if(i==2)
+                {
                     ROLLER2_STOP;    //0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
                     roller2_state=0;
                 }
@@ -1343,7 +1432,8 @@ static void IO_ctrl_cmd(void)
                 bidirection_run_flg[i]=0;
                 bidirection_run_time[i]=0;
             }
-            else if(bidirection_delay_time[i]>=1) {
+            else if(bidirection_delay_time[i]>=1)
+            {
                 bidirection_delay_time[i]--;   //³¤Ê±¼ä£¨3Ãë¼°ÒÔÉÏ£©µç»úÍ£Ö¹ÔËÐÐ£¬¿ÉÒÔÁ¢¼´Æô¶¯µç»ú
             }
             i++;
@@ -1352,11 +1442,13 @@ static void IO_ctrl_cmd(void)
             control_type[i]=1;//Õý¡¢·´Ïò¿ØÖÆ
             if(bidirection_old_ControlValue[i]==11)//´Ó·´×ªÖ±½Ó×ªÏòÕý×ª£¬ÐèÒªÑÓÊ±5S
             {
-                if(i==0) {
+                if(i==0)
+                {
                     ROLLER1_STOP;    //0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
                     roller1_state=0;
                 }
-                if(i==2) {
+                if(i==2)
+                {
                     ROLLER2_STOP;    //0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
                     roller2_state=0;
                 }
@@ -1368,16 +1460,19 @@ static void IO_ctrl_cmd(void)
                 if(i==0&&bidirection_location_flg[i]!=1)//bidirection_location_flg[i]±íÊ¾Î»ÖÃÐÅºÅ£¬Ö»ÄÜÓÃi=0»ò2£»²»ÓÃi=1»ò3£»µç»úÔËÐÐ×´Ì¬¼°Î»ÖÃ£¬0»ò8±íÊ¾Í££¬1±íÊ¾Õý×ªÍ£µÄÎ»ÖÃ£¬2±íÊ¾·´×ªÍ£µÄÎ»ÖÃ
                 {
                     ROLLER1_UP;
-                    if(bidirection_old_ControlValue[i]!=9) {
+                    if(bidirection_old_ControlValue[i]!=9)
+                    {
                         bidirection_old_ControlValue[i]=9;
                     }
-                    if(roller1_state!=1) {
+                    if(roller1_state!=1)
+                    {
                         MotorMAX[0]=0;
                         First_adc_average[0]=0;
                     }
                     roller1_state=1;//0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
 
-                    if(continue_run_nowtime[i]>=1&&continue_run_nowtime[i]<=0xFF00*10) {
+                    if(continue_run_nowtime[i]>=1&&continue_run_nowtime[i]<=0xFF00*10)
+                    {
                         continue_run_nowtime[i]--;
                     }
                     if(continue_run_nowtime[i]==0)
@@ -1392,16 +1487,19 @@ static void IO_ctrl_cmd(void)
                 if(i==2&&bidirection_location_flg[i]!=1)
                 {
                     ROLLER2_UP;
-                    if(bidirection_old_ControlValue[i]!=9) {
+                    if(bidirection_old_ControlValue[i]!=9)
+                    {
                         bidirection_old_ControlValue[i]=9;
                     }
-                    if(roller2_state!=1) {
+                    if(roller2_state!=1)
+                    {
                         MotorMAX[2]=0;
                         First_adc_average[2]=0;
                     }
                     roller2_state=1;//0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
 
-                    if(continue_run_nowtime[i]>=1&&continue_run_nowtime[i]<=0xFF00*10) {
+                    if(continue_run_nowtime[i]>=1&&continue_run_nowtime[i]<=0xFF00*10)
+                    {
                         continue_run_nowtime[i]--;
                     }
                     if(continue_run_nowtime[i]==0)
@@ -1417,10 +1515,12 @@ static void IO_ctrl_cmd(void)
                 bidirection_run_flg[i]=2;
                 bidirection_run_time[i]=30;
             }
-            if(bidirection_delay_time[i]>=1) {
+            if(bidirection_delay_time[i]>=1)
+            {
                 bidirection_delay_time[i]--;
             }
-            if(bidirection_run_flg[i]!=2&&bidirection_run_time[i]>=1) {
+            if(bidirection_run_flg[i]!=2&&bidirection_run_time[i]>=1)
+            {
                 bidirection_run_time[i]--;
             }
 
@@ -1430,11 +1530,13 @@ static void IO_ctrl_cmd(void)
             control_type[i]=1;//Õý¡¢·´Ïò¿ØÖÆ
             if(bidirection_old_ControlValue[i]==9)//´ÓÕý×ªÖ±½Ó×ªÏò·´×ª£¬ÐèÒªÑÓÊ±5S
             {
-                if(i==0) {
+                if(i==0)
+                {
                     ROLLER1_STOP;    //0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
                     roller1_state=0;
                 }
-                if(i==2) {
+                if(i==2)
+                {
                     ROLLER2_STOP;    //0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
                     roller2_state=0;
                 }
@@ -1447,16 +1549,19 @@ static void IO_ctrl_cmd(void)
                 if(i==0&&bidirection_location_flg[i]!=2)
                 {
                     ROLLER1_DOWN;
-                    if(bidirection_old_ControlValue[i]!=11) {
+                    if(bidirection_old_ControlValue[i]!=11)
+                    {
                         bidirection_old_ControlValue[i]=11;
                     }
-                    if(roller1_state!=2) {
+                    if(roller1_state!=2)
+                    {
                         MotorMAX[1]=0;
                         First_adc_average[1]=0;
                     }
                     roller1_state=2;//0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
 
-                    if(continue_run_nowtime[i+1]>=1&&continue_run_nowtime[i+1]<=0xFF00*10) {
+                    if(continue_run_nowtime[i+1]>=1&&continue_run_nowtime[i+1]<=0xFF00*10)
+                    {
                         continue_run_nowtime[i+1]--;
                     }
                     if(continue_run_nowtime[i+1]==0)
@@ -1471,16 +1576,19 @@ static void IO_ctrl_cmd(void)
                 if(i==2&&bidirection_location_flg[i]!=2)//bidirection_location_flg[i]±íÊ¾Î»ÖÃÐÅºÅ£¬Ö»ÄÜÓÃi=0»ò2£»²»ÓÃi=0»ò2
                 {
                     ROLLER2_DOWN;
-                    if(bidirection_old_ControlValue[i]!=11) {
+                    if(bidirection_old_ControlValue[i]!=11)
+                    {
                         bidirection_old_ControlValue[i]=11;
                     }
-                    if(roller2_state!=2) {
+                    if(roller2_state!=2)
+                    {
                         MotorMAX[3]=0;
                         First_adc_average[3]=0;
                     }
                     roller2_state=2;//0±íÊ¾Í££»1±íÊ¾ÉÏÐÐ£»2±íÊ¾ÏÂÐÐ
 
-                    if(continue_run_nowtime[i+1]>=1&&continue_run_nowtime[i+1]<=0xFF00*10) {
+                    if(continue_run_nowtime[i+1]>=1&&continue_run_nowtime[i+1]<=0xFF00*10)
+                    {
                         continue_run_nowtime[i+1]--;   //·´×ª²ÉÓÃÍ¨µÀ1»òÍ¨µÀ3¿ØÖÆ²ÎÊý
                     }
                     if(continue_run_nowtime[i+1]==0)
@@ -1496,10 +1604,12 @@ static void IO_ctrl_cmd(void)
                 bidirection_run_flg[i]=1;
                 bidirection_run_time[i]=30;
             }
-            if(bidirection_delay_time[i]>=1) {
+            if(bidirection_delay_time[i]>=1)
+            {
                 bidirection_delay_time[i]--;
             }
-            if(bidirection_run_flg[i]!=1&&bidirection_run_time[i]>=1) {
+            if(bidirection_run_flg[i]!=1&&bidirection_run_time[i]>=1)
+            {
                 bidirection_run_time[i]--;
             }
 
@@ -1520,10 +1630,12 @@ u16 Get_Adclvbo(u8 TD_Xnumber,u16 TD_xiaxian,u16 TD_shangxian)
     for(i=0; i<100; i++)
     {
         Temp_adc=ADC_ConvertedValue[TD_Xnumber];
-        if(Temp_adc<TD_xiaxian) {
+        if(Temp_adc<TD_xiaxian)
+        {
             Temp_adc=TD_xiaxian;   //¹ýÂË
         }
-        if(Temp_adc>TD_shangxian) {
+        if(Temp_adc>TD_shangxian)
+        {
             Temp_adc=TD_shangxian;   //¹ýÂË
         }
         AdcLvbo[i]= Temp_adc;
@@ -1550,7 +1662,8 @@ u16 Get_Adclvbo(u8 TD_Xnumber,u16 TD_xiaxian,u16 TD_shangxian)
 }
 
 u16 First_Getaverage(u8 td_xnumber,u8 maxlvbo_xnumber,u16 temp_adc)
-{   u8 i;
+{
+    u8 i;
     for(i=0; i<maxlvbo_xnumber; i++)
     {
         Adc_average[td_xnumber][i] =temp_adc;
@@ -1560,7 +1673,8 @@ u16 First_Getaverage(u8 td_xnumber,u8 maxlvbo_xnumber,u16 temp_adc)
 }
 
 u16 TD_Getaverage(u8 td_xnumber,u8 tdlvbo_xnumber,u16 temp_xadc,u8 tdcycle_xi)
-{   u8 i;
+{
+    u8 i;
     u32 average_adcto=0;
     Adc_average[td_xnumber][tdcycle_xi] =temp_xadc;
     for(i=0; i<tdlvbo_xnumber; i++)
@@ -1596,7 +1710,8 @@ static void usart3_send_cmd(void)//²É¼¯Æ÷Ïò´«¸ÐÆ÷·¢Êý¾Ý²éÑ¯ÃüÁî
         break;
     }
     USART3_send_sequence++;
-    if(USART3_send_sequence>=0x01) {
+    if(USART3_send_sequence>=0x01)
+    {
         USART3_send_sequence=0;
     }
 }
